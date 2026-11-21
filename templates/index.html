@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Women's Safety Portal - Central Command</title>
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="state-resting">
+
+    <div class="dashboard-container">
+        <!-- Top Nav Header -->
+        <header class="glass-panel">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                </div>
+                <div class="brand-name">HERGUARD CENTRAL</div>
+            </div>
+            
+            <div class="nav-tabs" id="main-nav-tabs">
+                <button class="tab-btn active" id="tab-btn-alerts" onclick="switchView('alerts')">Alerts Dashboard</button>
+                <button class="tab-btn" id="tab-btn-workstations" onclick="switchView('workstations')">Workstations</button>
+            </div>
+            
+            <div class="system-clock" id="clock">00:00:00</div>
+        </header>
+
+        <!-- Dynamic Overview Statistics Row (Always visible for quick glance) -->
+        <section class="stats-row" id="global-stats-row">
+            <div class="stat-card glass-panel" id="card-state">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-info">
+                    <span class="stat-label">System State</span>
+                    <span class="stat-value" id="val-state">RESTING</span>
+                </div>
+            </div>
+            <div class="stat-card glass-panel" id="card-heart">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-info">
+                    <span class="stat-label">Subject Pulse</span>
+                    <span class="stat-value" id="val-heart">-- BPM</span>
+                </div>
+            </div>
+            <div class="stat-card glass-panel" id="card-freq">
+                <div class="stat-icon">🔊</div>
+                <div class="stat-info">
+                    <span class="stat-label">Tone Frequency</span>
+                    <span class="stat-value" id="val-freq">0 Hz</span>
+                </div>
+            </div>
+            <div class="stat-card glass-panel" id="card-faces">
+                <div class="stat-icon">👤</div>
+                <div class="stat-info">
+                    <span class="stat-label">Faces Captured</span>
+                    <span class="stat-value" id="val-faces">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 1: ALERTS DASHBOARD ==================== -->
+        <main class="tab-content active" id="view-alerts">
+            <div id="alerts-container">
+                <!-- If Resting: Beautiful empty state -->
+                <div class="empty-state-panel glass-panel" id="panel-no-alerts">
+                    <div class="empty-state-shield">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--neon-green)" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            <polyline points="9 11 11 13 15 9" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h2>SYSTEM SECURE</h2>
+                    <p>No active alerts recorded. All connected workstations are running in safe monitoring mode.</p>
+                </div>
+
+                <!-- If Triggered: Live Active Alert Card -->
+                <div class="active-alert-card glass-panel state-triggered-alert" id="panel-active-alert" style="display: none;" onclick="switchView('live-command')">
+                    <div class="alert-badge-pulsing">ACTIVE THREAT</div>
+                    
+                    <div class="alert-card-layout">
+                        <div class="alert-card-thumbnail-wrapper">
+                            <!-- Static start frame from the beginning of the alert -->
+                            <img src="/static/screenshots/alert_start.jpg" alt="Alert Start Frame" id="alert-static-thumb" onerror="this.src='/video_feed'">
+                            <div class="thumbnail-overlay">START OF ALERT FRAME</div>
+                        </div>
+                        
+                        <div class="alert-card-details">
+                            <h2 style="color:var(--neon-red); font-size:1.4rem; font-weight:700; margin-bottom: 0.25rem;">HQ-PI-ZERO-01</h2>
+                            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom: 1.25rem;">Central Machine - Local Area Node</p>
+                            
+                            <div class="alert-card-metrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">Source</span>
+                                    <span class="metric-value" id="alert-card-val-source">AUDIO (1000Hz)</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Duration</span>
+                                    <span class="metric-value" id="alert-card-val-duration">0s</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Current Pulse</span>
+                                    <span class="metric-value" style="color:var(--neon-red);" id="alert-card-val-pulse">-- BPM</span>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary alert-action-btn">
+                                🚨 ENTER LIVE COMMAND FEED
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ==================== VIEW 2: LIVE COMMAND FEED PANEL ==================== -->
+        <main class="tab-content" id="view-live-command">
+            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <button class="back-link-btn" onclick="switchView('alerts')">
+                    ← Back to Dashboard
+                </button>
+                <div class="live-feed-badge">
+                    <div class="pulse-dot"></div>
+                    <span id="live-feed-badge-text">RESTING</span>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left Pane: Live Camera and Mic streams -->
+                <div class="feed-container glass-panel">
+                    <div class="video-frame-wrapper">
+                        <!-- Standard MJPEG streaming via img element -->
+                        <img src="/video_feed" alt="Camera Feed" class="live-video-feed" id="camera-feed-img">
+                    </div>
+                    
+                    <div class="audio-controls-container">
+                        <div class="audio-info">
+                            <button class="audio-icon-btn" id="audio-toggle-btn" onclick="toggleAudio()">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" id="play-svg-path"/>
+                                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" id="pause-svg-path" style="display:none;"/>
+                                </svg>
+                            </button>
+                            <div>
+                                <div style="font-size:0.85rem; font-weight:600;">Microphone Audio Feed</div>
+                                <div style="font-size:0.7rem; color:var(--text-muted);" id="audio-feed-status">Muted / Click play to stream</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Waveform canvas visualizer -->
+                        <div style="flex-grow:1; max-width:260px; margin-left: 2rem;">
+                            <canvas id="audio-waveform" class="waveform-canvas"></canvas>
+                        </div>
+                        
+                        <!-- Native audio tag for WAV stream -->
+                        <audio id="live-audio" src="/audio_feed" crossorigin="anonymous"></audio>
+                    </div>
+                </div>
+
+                <!-- Right Pane: Actions and Charts -->
+                <div class="controls-card glass-panel">
+                    <h3 style="font-size:1.1rem; font-weight:600; margin-bottom: 0.25rem; letter-spacing: 0.5px;">RESPONDER INTERVENTION</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 1.25rem;">Resolve alerts, force emergency configurations, or clear history.</p>
+                    
+                    <!-- Alert Controls -->
+                    <button class="btn btn-success" id="btn-reset" onclick="resetAlert()" style="margin-bottom: 0.75rem;">
+                        🛡️ MARK AS FALSE ALARM (RESET)
+                    </button>
+                    
+                    <button class="btn btn-primary" id="btn-trigger" onclick="triggerAlert()" style="margin-bottom: 0.75rem;">
+                        ⚠️ FORCE EMERGENCY TRIGGER
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="deleteHistory()" style="background: rgba(244, 67, 54, 0.1); border-color: rgba(244, 67, 54, 0.2); color: #ff5252;">
+                        🗑️ PURGE CAPTURES HISTORY
+                    </button>
+
+                    <!-- Waveform canvasses -->
+                    <div class="telemetry-panels">
+                        <div class="telemetry-card">
+                            <span class="telemetry-title">🔊 Mic Intensity</span>
+                            <div class="telemetry-chart-container">
+                                <canvas id="canvas-mic-chart" style="width: 100%; height: 100%;"></canvas>
+                            </div>
+                        </div>
+                        <div class="telemetry-card">
+                            <span class="telemetry-title">❤️ Heart Rhythm</span>
+                            <div class="telemetry-chart-container">
+                                <canvas id="canvas-pulse-chart" style="width: 100%; height: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Face screenshots gallery -->
+            <section class="screenshot-gallery-card glass-panel">
+                <div class="gallery-header">
+                    <h3 style="font-size:1.1rem; font-weight:600; display:flex; align-items:center; gap:0.5rem;">
+                        👤 DETECTED FACES ARCHIVE
+                    </h3>
+                    <span style="font-size:0.8rem; color:var(--text-muted);" id="snapshots-count">0 snapshots saved</span>
+                </div>
+                <div class="gallery-grid" id="screenshots-gallery">
+                    <div class="no-screenshots">
+                        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        <span>No captures recorded yet. Faces are captured during active emergency alerts.</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ==================== VIEW 3: WORKSTATIONS PANEL ==================== -->
+        <main class="tab-content" id="view-workstations">
+            <div class="devices-grid">
+                
+                <!-- Workstation card (heart rate telemetry removed as requested) -->
+                <div class="device-card glass-panel">
+                    <div class="device-card-header">
+                        <div class="device-info">
+                            <h3>HQ-PI-ZERO-01</h3>
+                            <p>Local Central Workstation Node</p>
+                        </div>
+                        <div class="device-badge badge-online">
+                            ONLINE
+                        </div>
+                    </div>
+
+                    <div class="device-stats">
+                        <div class="device-stat-item">
+                            <span class="device-stat-label">Central Model</span>
+                            <span class="device-stat-value">Raspberry Pi Zero</span>
+                        </div>
+                        <div class="device-stat-item">
+                            <span class="device-stat-label">Audio Input</span>
+                            <span class="device-stat-value">INMP441 I2S Mic</span>
+                        </div>
+                        <div class="device-stat-item">
+                            <span class="device-stat-label">Hardware OLED</span>
+                            <span class="device-stat-value">SSD1306 (0x3C)</span>
+                        </div>
+                        <div class="device-stat-item">
+                            <span class="device-stat-label">Device Status</span>
+                            <span class="device-stat-value" id="workstation-card-status" style="color:var(--neon-green);">RESTING</span>
+                        </div>
+                    </div>
+
+                    <!-- Volunteering Dashboard Widget -->
+                    <div class="volunteering-dashboard">
+                        <div class="volunteering-title">📢 Volunteering Dashboard</div>
+                        <div class="volunteering-details">
+                            <div class="volunteering-status-row">
+                                <span class="v-label">Volunteer Status</span>
+                                <span class="v-value" id="device-volunteer-status" style="color: var(--neon-green); font-weight: 700;">AVAILABLE</span>
+                            </div>
+                            <div class="volunteering-actions">
+                                <button class="v-btn-reset" id="btn-device-reset" onclick="markAlertAsFalse(event)" disabled>
+                                    🛡️ Mark Alert as False
+                                </button>
+                                <button class="v-btn-nearby" onclick="switchView('volunteers')">
+                                    📍 Nearby Volunteers
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-secondary" onclick="switchView('live-command')" style="flex: 1;">
+                            👁️ OPEN LIVE VIEW
+                        </button>
+                        <button class="btn btn-primary" onclick="triggerAlert()" style="flex: 1; margin-top:0;">
+                            ⚠️ TEST TRIGGER
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- ==================== VIEW 4: NEARBY VOLUNTEERS PANEL ==================== -->
+        <main class="tab-content" id="view-volunteers">
+            <div style="margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <button class="back-link-btn" onclick="switchView('workstations')">
+                    ← Back to Workstations
+                </button>
+                <div class="live-feed-badge">
+                    <span id="volunteers-active-count">0 Nodes Alerted</span>
+                </div>
+            </div>
+
+            <div class="volunteers-layout">
+                <!-- Left column: Scrollable list of nearby volunteers -->
+                <div class="volunteers-list-card glass-panel">
+                    <h3 style="font-size:1.15rem; font-weight:600; margin-bottom: 0.5rem; letter-spacing: 0.5px;">NEARBY VOLUNTEERS</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 1.5rem;">
+                        Real-time status of responder nodes in the local geographic grid.
+                    </p>
+                    
+                    <div class="volunteers-list" id="volunteers-list-container">
+                        <!-- Populated dynamically by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Right column: Geographic Grid Radar Visualizer -->
+                <div class="volunteers-map-card glass-panel">
+                    <h3 style="font-size:1.15rem; font-weight:600; margin-bottom: 0.5rem; letter-spacing: 0.5px;">GEOGRAPHIC GRID MONITOR</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 1.5rem;">
+                        Relative coordinate mapping of nodes within scanning range.
+                    </p>
+                    
+                    <div class="map-visualization-container">
+                        <canvas id="canvas-volunteers-map" class="volunteers-map-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+            <img src="" alt="Expanded face capture" id="lightbox-img">
+        </div>
+    </div>
+
+    <!-- JavaScript Module -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
